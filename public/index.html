@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#1769d2">
+<title>CodeRelay — Shared coding room</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#172337;background:#f4f7fb}
+*{box-sizing:border-box}body{margin:0}header{background:#fff;border-bottom:1px solid #dfe6ef;padding:16px clamp(16px,4vw,42px);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:11px}.logo{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;background:#1769d2;color:#fff;font:700 16px ui-monospace,monospace}.brand h1{font-size:19px;margin:0}.sub{font-size:12px;color:#718096;margin-top:3px}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:1px solid #cdd7e4;background:#fff;color:#25364d;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:650}button:hover{background:#eef3f9}.primary{background:#1769d2;color:white;border-color:#1769d2}.primary:hover{background:#1058b4;color:#fff}
+main{max-width:1300px;margin:25px auto;padding:0 18px}.intro{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;flex-wrap:wrap;margin-bottom:18px}.intro h2{margin:0 0 6px;font-size:24px;letter-spacing:-.5px}.intro p{margin:0;color:#637187;font-size:14px;line-height:1.5}.layout{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:16px;align-items:start}.card{background:#fff;border:1px solid #dfe6ef;border-radius:12px;overflow:hidden}.editor-top{padding:12px 14px;border-bottom:1px solid #e4eaf2;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.editor-top label{font-size:12px;color:#637187}.editor-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.lock-indicator{font-size:11px;color:#8a5a00;background:#fff4d6;border:1px solid #f0d998;padding:5px 8px;border-radius:7px}.readonly #code{color:#b9c8da;cursor:text}.editor-top select{margin-left:7px;max-width:170px;padding:6px;border:1px solid #d2dce8;border-radius:7px;background:white}.status{font-size:12px;color:#637187;display:flex;align-items:center;gap:7px}.dot{width:8px;height:8px;background:#22a06b;border-radius:50%}.dot.off{background:#d97706}
+#code{display:block;width:100%;height:58vh;min-height:340px;resize:vertical;background:#17212e;color:#e5edf8;border:0;outline:none;padding:18px;font:13px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2;white-space:pre;overflow:auto}
+.editor-bottom{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid #e4eaf2;color:#718096;font-size:12px}.side{padding:17px}.side h3{font-size:15px;margin:0 0 8px}.side p{font-size:12px;line-height:1.55;color:#718096;margin:0 0 13px}.qr-wrap{display:flex;justify-content:center;padding:12px;background:#fff;border:1px solid #e4eaf2;border-radius:9px;min-height:160px;align-items:center}.qr-wrap img{width:100%;max-width:220px;height:auto}.linkbox{display:flex;gap:6px;margin-top:9px}.linkbox input{width:100%;min-width:0;font-size:11px;padding:8px;border:1px solid #d2dce8;border-radius:7px}.side button{width:100%;margin-top:9px}.divider{border:0;border-top:1px solid #e4eaf2;margin:18px 0}.notice{border:1px solid #dbe5f0;background:#f5f8fc;border-radius:8px;padding:10px 11px;font-size:12px;line-height:1.5;color:#53647b;margin-top:12px;overflow-wrap:anywhere}.notice.good{background:#effaf3;border-color:#c7ead5;color:#176b43}.notice.bad{background:#fff0f0;border-color:#f0caca;color:#9b2929}.hidden{display:none!important}.room-pill{border-radius:99px;background:#edf3fb;padding:5px 9px;font-size:11px;color:#345b8d}.footer{max-width:1300px;margin:0 auto;padding:5px 18px 24px;color:#8390a3;font-size:11px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+#splash{position:fixed;inset:0;z-index:50;background:#fff;display:grid;place-items:center;transition:opacity .25s}.splash-inner{text-align:center}.splash-logo{width:64px;height:64px;display:grid;place-items:center;margin:0 auto 16px;background:#1769d2;color:#fff;border-radius:15px;font:700 23px monospace}.splash-title{font-size:27px;font-weight:760;letter-spacing:-.7px}.splash-credit{font-size:14px;color:#6d7a8d;margin-top:10px}#splash.done{opacity:0;pointer-events:none}
+dialog{max-width:540px;width:calc(100% - 30px);border:1px solid #dce3ed;border-radius:12px;padding:23px;color:#172337}dialog::backdrop{background:#17233788}dialog p{font-size:13px;line-height:1.6;color:#58677d}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:1fr 1fr;gap:14px}.side .side-section{min-width:0}.side .full{grid-column:1/-1}.qr-wrap{min-height:130px}#code{height:55vh}}
+@media(max-width:540px){.side{display:block}.intro h2{font-size:21px}#code{min-height:300px;height:52vh}.header-actions{width:100%}}
+@media(prefers-reduced-motion:reduce){#splash{transition:none}}
+</style>
+</head>
+<body>
+<div id="splash"><div class="splash-inner"><div class="splash-logo">&lt;/&gt;</div><div class="splash-title">CodeRelay</div><div class="splash-credit">Built by Adarsh</div></div></div>
+<header>
+  <div class="brand"><div class="logo">&lt;/&gt;</div><div><h1>CodeRelay</h1><div class="sub">One editor. Your whole team.</div></div></div>
+  <div class="header-actions"><button id="termsBtn">Terms &amp; Conditions</button></div>
+</header>
+<main>
+  <div class="intro"><div><h2>Code together, simply.</h2><p>Share one QR code and edit the same code live. The owner can lock editing while keeping code viewable and copyable. No edit history. Any language.</p></div><span id="roomPill" class="room-pill">New workspace</span></div>
+  <div class="layout">
+    <section class="card">
+      <div class="editor-top">
+        <div><label for="language">LANGUAGE</label><select id="language">
+          <option>Plain text</option><option>JavaScript</option><option>TypeScript</option><option>Python</option><option>HTML</option><option>CSS</option><option>Java</option><option>C</option><option>C++</option><option>C#</option><option>Go</option><option>Rust</option><option>PHP</option><option>Ruby</option><option>Swift</option><option>Kotlin</option><option>SQL</option><option>Shell</option><option>JSON</option><option>YAML</option><option>Markdown</option><option>Other</option>
+        </select></div>
+        <div class="editor-actions"><span id="lockIndicator" class="lock-indicator hidden">Read-only · locked</span><button id="copyCode">Copy code</button><button id="lockBtn" class="hidden">Encrypt / Lock editing</button><div class="status"><span id="statusDot" class="dot off"></span><span id="status">Not connected</span></div></div>
+      </div>
+      <textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" placeholder="// Write or paste code here. Share the room so your team can edit with you."></textarea>
+      <div class="editor-bottom"><span id="charCount">0 characters</span><span id="syncState">Changes sync while connected</span></div>
+    </section>
+    <aside class="card side">
+      <div class="side-section">
+        <h3>Invite your team</h3><p>Scan the QR code or share the workspace link. Anyone with the link can edit until you lock the workspace.</p>
+        <div class="qr-wrap"><span id="qrPlaceholder" class="sub">Create a workspace to generate a QR code.</span><img id="qr" class="hidden" alt="Workspace QR code"></div>
+        <div class="linkbox"><input id="shareLink" readonly placeholder="Workspace link appears here"><button id="copyLink" style="width:auto;margin:0">Copy</button></div>
+        <button id="createRoom" class="primary">Create workspace &amp; QR</button>
+        <button id="newRoom">Create a new workspace</button>
+      </div>
+      <hr class="divider full">
+      <div class="side-section">
+        <h3>Live team status</h3><p>Connected editors see the same current code. There is no timeline or undo history stored by CodeRelay.</p>
+        <div id="notice" class="notice">Create a workspace first. The room stays active only while this server process is running.</div>
+      </div>
+    </aside>
+  </div>
+</main>
+<div class="footer"><span>CodeRelay · Built by Adarsh</span><span>Temporary in-memory workspace · No database</span></div>
+<dialog id="terms"><h2>Terms &amp; Conditions</h2>
+<p><strong>1. Shared editing.</strong> Anyone with the workspace link can view and edit the current code until the owner turns on the editing lock. Share links only with people you trust.</p>
+<p><strong>2. Owner editing lock.</strong> The owner can lock editing. Other visitors can still read and copy code, but the server rejects their edit attempts. This is an editing permission lock, not encryption of the code contents.</p>
+<p><strong>3. No history or permanent storage.</strong> CodeRelay does not keep edit history or write workspace code to a database or file. The active code is held in server memory while the room exists. Restarting the server clears all rooms.</p>
+<p><strong>4. No secrets.</strong> Do not paste passwords, API keys, access tokens, private keys, personal information, or confidential code into a shared workspace.</p>
+<p><strong>5. Availability.</strong> Rooms can disappear if the server restarts, runs out of memory, or the host sleeps. A QR code is only a link; remote collaboration requires a deployed server accessible to your team.</p>
+<p><strong>6. Responsible use.</strong> Use this service only for lawful collaboration. This prototype is provided as-is and these terms are a draft, not legal advice.</p>
+<button id="closeTerms">Close</button></dialog>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const socket = io();
+let roomId = null, isApplyingRemote = false, sendTimer = null, creating = false, isOwner = false, isLocked = false;
+const OWNER_KEYS_STORAGE = "coderelay-owner-keys-v1";
+function getOwnerKey(id) {
+  try { return JSON.parse(localStorage.getItem(OWNER_KEYS_STORAGE) || "{}")[id] || ""; } catch { return ""; }
+}
+function saveOwnerKey(id, token) {
+  try { const keys = JSON.parse(localStorage.getItem(OWNER_KEYS_STORAGE) || "{}"); keys[id] = token; localStorage.setItem(OWNER_KEYS_STORAGE, JSON.stringify(keys)); } catch {}
+}
+function applyPermissions() {
+  const readOnly = isLocked && !isOwner;
+  $("code").readOnly = readOnly;
+  $("language").disabled = readOnly;
+  $("lockBtn").classList.toggle("hidden", !isOwner);
+  $("lockBtn").textContent = isLocked ? "Unlock editing" : "Encrypt / Lock editing";
+  $("lockIndicator").classList.toggle("hidden", !readOnly);
+  document.querySelector(".editor-top").classList.toggle("readonly", readOnly);
+  if (readOnly) $("syncState").textContent = "Read-only · copying allowed";
+}
+const MAX_CODE_LENGTH = 80000;
+setTimeout(() => { $("splash").classList.add("done"); setTimeout(() => $("splash")?.remove(), 350); }, 1100);
+
+function setStatus(text, connected) {
+  $("status").textContent = text;
+  $("statusDot").classList.toggle("off", !connected);
+}
+function showNotice(text, type="") {
+  $("notice").className = "notice" + (type ? " " + type : "");
+  $("notice").textContent = text;
+}
+function updateCount() { $("charCount").textContent = $("code").value.length.toLocaleString() + " characters"; }
+function updateUrl() {
+  if (!roomId) return;
+  const url = location.origin + "/room/" + roomId;
+  $("shareLink").value = url;
+  $("roomPill").textContent = "Room " + roomId.slice(0, 7);
+  $("qr").src = "/api/qr?url=" + encodeURIComponent(url);
+  $("qr").classList.remove("hidden");
+  $("qrPlaceholder").classList.add("hidden");
+}
+async function createRoom() {
+  if (creating) return;
+  creating = true;
+  $("createRoom").disabled = true;
+  try {
+    const response = await fetch("/api/rooms", {
+      method: "POST", headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({code:$("code").value, language:$("language").value})
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Could not create workspace.");
+    roomId = data.id;
+    isOwner = true;
+    saveOwnerKey(roomId, data.ownerToken);
+    history.replaceState({}, "", "/room/" + roomId);
+    updateUrl();
+    socket.emit("join-room", {id:roomId, ownerToken:data.ownerToken});
+    showNotice("Workspace created. Share the QR or link. You can lock editing at any time.", "good");
+  } catch (error) {
+    showNotice(error.message, "bad");
+  } finally {
+    creating = false;
+    $("createRoom").disabled = false;
+  }
+}
+function joinFromPath() {
+  const match = location.pathname.match(/^\/room\/([A-Za-z0-9_-]+)$/);
+  if (!match) return false;
+  roomId = match[1];
+  updateUrl();
+  socket.emit("join-room", {id:roomId, ownerToken:getOwnerKey(roomId)});
+  return true;
+}
+$("createRoom").addEventListener("click", createRoom);
+$("newRoom").addEventListener("click", () => {
+  roomId = null;
+  isOwner = false; isLocked = false; applyPermissions();
+  history.replaceState({}, "", "/");
+  $("shareLink").value = "";
+  $("qr").classList.add("hidden");
+  $("qrPlaceholder").classList.remove("hidden");
+  $("roomPill").textContent = "New workspace";
+  showNotice("Your current text remains in the editor. Create a new workspace when ready.");
+  setStatus("Not connected", false);
+});
+$("code").addEventListener("input", () => {
+  updateCount();
+  if (isApplyingRemote) return;
+  if ($("code").value.length > MAX_CODE_LENGTH) {
+    showNotice("Maximum code length is 80,000 characters.", "bad");
+    return;
+  }
+  if (!roomId) {
+    $("syncState").textContent = "Not shared yet";
+    return;
+  }
+  if (isLocked && !isOwner) return;
+  $("syncState").textContent = "Syncing…";
+  clearTimeout(sendTimer);
+  sendTimer = setTimeout(() => {
+    socket.emit("edit", {id:roomId, code:$("code").value, language:$("language").value});
+    $("syncState").textContent = "Synced to connected editors";
+  }, 100);
+});
+$("language").addEventListener("change", () => {
+  if (roomId && (!isLocked || isOwner)) socket.emit("edit", {id:roomId, code:$("code").value, language:$("language").value});
+});
+$("copyLink").addEventListener("click", async () => {
+  if (!$("shareLink").value) return showNotice("Create a workspace first.");
+  try { await navigator.clipboard.writeText($("shareLink").value); showNotice("Workspace link copied.", "good"); }
+  catch { $("shareLink").select(); showNotice("Select and copy the link manually."); }
+});
+socket.on("connect", () => {
+  setStatus("Connected", true);
+  if (roomId) socket.emit("join-room", {id:roomId, ownerToken:getOwnerKey(roomId)});
+});
+socket.on("disconnect", () => setStatus("Reconnecting…", false));
+socket.on("room-state", state => {
+  roomId = state.id;
+  isOwner = Boolean(state.isOwner);
+  isLocked = Boolean(state.locked);
+  isApplyingRemote = true;
+  $("code").value = state.code;
+  $("language").value = state.language || "Plain text";
+  isApplyingRemote = false;
+  updateCount(); updateUrl(); applyPermissions();
+  setStatus(state.participants + " connected", true);
+  if (!isLocked) showNotice(isOwner ? "Owner workspace connected. You can share the QR/link and control editing access." : "Connected to shared workspace. Edits sync live; no edit history is retained.", "good");
+});
+socket.on("presence", data => setStatus(data.participants + " connected", true));
+socket.on("remote-edit", data => {
+  isApplyingRemote = true;
+  const start = $("code").selectionStart, end = $("code").selectionEnd;
+  $("code").value = data.code;
+  $("language").value = data.language || "Plain text";
+  $("code").setSelectionRange(Math.min(start, data.code.length), Math.min(end, data.code.length));
+  isApplyingRemote = false;
+  updateCount();
+  $("syncState").textContent = isLocked && !isOwner ? "Read-only · copying allowed" : "Live update received";
+});
+socket.on("lock-state", data => {
+  isLocked = Boolean(data.locked);
+  if (typeof data.isOwner === "boolean") isOwner = data.isOwner;
+  applyPermissions();
+  if (isOwner) showNotice(isLocked ? "Editing locked. Visitors can view and copy code; only you can edit." : "Editing unlocked. Everyone with the link can edit again.", "good");
+});
+socket.on("permission-error", message => showNotice(message, "bad"));
+socket.on("room-error", message => {
+  showNotice(message, "bad");
+  setStatus("Room unavailable", false);
+});
+$("lockBtn").addEventListener("click", () => {
+  if (!roomId || !isOwner) return;
+  socket.emit("set-lock", {id:roomId, ownerToken:getOwnerKey(roomId), locked:!isLocked});
+});
+$("copyCode").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("code").value); showNotice("Code copied to clipboard.", "good"); }
+  catch { $("code").focus(); $("code").select(); showNotice("Code selected. Copy it with Ctrl+C (or Cmd+C on Mac)."); }
+});
+$("termsBtn").onclick = () => $("terms").showModal();
+$("closeTerms").onclick = () => $("terms").close();
+updateCount();
+if (!joinFromPath()) setStatus("Not connected", false);
+})();
+</script>
+</body></html>
